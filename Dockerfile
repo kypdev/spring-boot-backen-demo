@@ -1,15 +1,17 @@
-FROM ubuntu:latest AS build
+# Use official base image of Java Runtim
+FROM openjdk:8-jdk-alpine
 
-RUN apt-get update
-RUN apt-get install openjdk-17-jdk -y
-COPY . .
+# Set volume point to /tmp
+VOLUME /tmp
 
-RUN ./gradlew bootJar --no-daemon
-
-FROM openjdk:17-jdk-slim
-
+# Make port 8080 available to the world outside container
 EXPOSE 8080
 
-COPY --from=build /build/libs/demo-1.jar app.jar
+# Set application's JAR file
+ARG JAR_FILE=target/hello-docker-0.0.1-SNAPSHOT.jar
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Add the application's JAR file to the container
+ADD ${JAR_FILE} app.jar
+
+# Run the JAR file
+ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/app.jar"]
